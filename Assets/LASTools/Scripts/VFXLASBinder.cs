@@ -84,14 +84,58 @@ namespace bosqmode.LASTools
         private List<Color[]> _colorarray = new List<Color[]>();
         private Vector3 _anchorOffset = Vector3.zero;
         private LASPointReader _pointReader;
+        private VisualEffect _effect;
+        private int _maxTextureDepthOverride = -1;
 
         private const int MAX_TEXTURE_DEPTH = 256;
         private const int POINT_BATCH = 500;
+        private const int MAX_CONCURRENT_TEXTUREUPDATES = 3;
+
+        private static List<LASBinder> _currentlyUpdating = new List<LASBinder>();
 #endregion
 
 #region Methods
+        public void Initialize(List<string> streamingAssetFiles, int pskip, bool useanchor, Vector3 anchorOverride, int maxTextureSizeOverride = -1)
+        {
+            m_LASFilesInStreamingAssets = streamingAssetFiles;
+            m_skip = pskip;
+            m_useFirstPointAsAnchor = useanchor;
+            _anchorOffset = anchorOverride;
+            _maxTextureDepthOverride = maxTextureSizeOverride;
+        }
+
+        public void UpdatePoints(bool resetanchor = true)
+        {
+            if(resetanchor || !m_useFirstPointAsAnchor)
+                _anchorOffset = Vector3.zero;
+
+            _index = 0;
+            _colorarray = new List<Color[]>() { new Color[_positionMapArray.width] };
+            _depth = 0;
+            InitiateTexture();
+            _points = new ConcurrentBag<Vector3>();
+            ReadPoints();
+            _update.pressed = false;
+        }
+
+        protected override void OnDisable()
+        {
+            base.OnDisable();
+
+            if (_pointReader != null)
+            {
+                _pointReader.Dispose();
+            }
+
+            if (_currentlyUpdating.Contains(this))
+            {
+                _currentlyUpdating.Remove(this);
+            }
+        }
+
         protected override void OnEnable()
         {
+            _effect = GetComponent<VisualEffect>();
             base.OnEnable();
             _update.pressed = false;
 
@@ -101,7 +145,7 @@ namespace bosqmode.LASTools
 
         private void InitiateTexture()
         {
-            _positionMapArray = new Texture2DArray(SystemInfo.maxTextureSize, 1, MAX_TEXTURE_DEPTH, TextureFormat.RGBAFloat, false, true);
+            _positionMapArray = new Texture2DArray(SystemInfo.maxTextureSize, 1, _maxTextureDepthOverride > 0 ? _maxTextureDepthOverride : MAX_TEXTURE_DEPTH, TextureFormat.RGBAFloat, false, true);
         }
 
         private void ReadPoints()
@@ -135,26 +179,30 @@ namespace bosqmode.LASTools
         public override bool IsValid(VisualEffect component)
         {
             return component.HasTexture(PositionMapPropertyArray) &&
-                component.HasInt(PositionDepthProperty) && _depth > 0;
+                component.HasInt(PositionDepthProperty) && m_LASFilesInStreamingAssets.Count > 0;
         }
 
         private void Update()
         {
             if(_update.pressed)
             {
-                _anchorOffset = Vector3.zero;
-                _index = 0;
-                _colorarray = new List<Color[]>() { new Color[_positionMapArray.width] };
-                _depth = 0;
-                InitiateTexture();
-                _points = new ConcurrentBag<Vector3>();
-                ReadPoints();
-                _update.pressed = false;
+                UpdatePoints();
             }
 
             if (_points.Count > 0)
             {
-                AddNewPoints();
+                if (_currentlyUpdating.Count < MAX_CONCURRENT_TEXTUREUPDATES && !_currentlyUpdating.Contains(this))
+                {
+                    _currentlyUpdating.Add(this);
+                }
+
+                if (_currentlyUpdating.Contains(this))
+                {
+                    AddNewPoints();
+                }
+            } else if (_currentlyUpdating.Contains(this))
+            {
+                _currentlyUpdating.Remove(this);
             }
         }
 
@@ -183,6 +231,13 @@ namespace bosqmode.LASTools
                     else
                     {
                         _positionMapArray.SetPixels(_colorarray[_depth], _depth);
+
+                        if(_depth > _positionMapArray.depth)
+                        {
+                            Debug.LogError("maximum depth reached: try increasing point skip");
+                            break;
+                        }
+
                         _depth++;
                         _index = 0;
                         _colorarray.Add(new Color[_positionMapArray.width]);
@@ -192,6 +247,9 @@ namespace bosqmode.LASTools
 
             _positionMapArray.SetPixels(_colorarray[_depth], _depth);
             _positionMapArray.Apply(false, false);
+
+            //Force effect update since UpdateBinding doesn't seem to be called if depth is 0
+            UpdateBinding(_effect);
         }
 
         public override string ToString()

@@ -121,20 +121,6 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!115 &546235375
-MonoScript:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: 
-  serializedVersion: 5
-  m_Script: 
-  m_DefaultReferences: {}
-  m_Icon: {fileID: 0}
-  m_ExecutionOrder: 0
-  m_ClassName: LASBinder
-  m_Namespace: bosqmode.LASTools
 --- !u!1 &1212533677
 GameObject:
   m_ObjectHideFlags: 0
@@ -378,6 +364,20 @@ MonoScript:
   m_ExecutionOrder: 0
   m_ClassName: LASBinder
   m_Namespace: UnityEditor.Experimental.VFX.Utility
+--- !u!115 &1293297322
+MonoScript:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  serializedVersion: 5
+  m_Script: 
+  m_DefaultReferences: {}
+  m_Icon: {fileID: 0}
+  m_ExecutionOrder: 0
+  m_ClassName: LASBinder
+  m_Namespace: bosqmode.LASTools
 --- !u!1 &1339056267
 GameObject:
   m_ObjectHideFlags: 0
@@ -398,7 +398,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1339056268
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -420,7 +420,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1339056267}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 546235375}
+  m_Script: {fileID: 1293297322}
   m_Name: 
   m_EditorClassIdentifier: 
   m_skip: 25
@@ -435,7 +435,7 @@ VFXRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1339056267}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 0
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
@@ -542,8 +542,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_ExecuteInEditor: 1
-  m_Bindings:
-  - {fileID: 1339056269}
+  m_Bindings: []
   m_VisualEffect: {fileID: 1339056271}
 --- !u!1 &1639485705
 GameObject:
@@ -820,7 +819,7 @@ VFXRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1929433722}
-  m_Enabled: 0
+  m_Enabled: 1
   m_CastShadows: 0
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1

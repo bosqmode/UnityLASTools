@@ -11,8 +11,8 @@ namespace bosqmode.LASTools
     {
         public const int MAX_CONCURRENT_THREADS = 3;
         protected volatile bool _cancel = false;
-        private List<Thread> _threads = new List<Thread>();
-        private object _lock = new object();
+        private static List<Thread> _threads = new List<Thread>();
+        private static object _lock = new object();
 
         public void Dispose()
         {

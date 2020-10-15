@@ -36,6 +36,7 @@ namespace bosqmode.LASTools
         private static void Init()
         {
             LAS2PCacheEditor window = (LAS2PCacheEditor)EditorWindow.GetWindow(typeof(LAS2PCacheEditor));
+            window.titleContent.text = "LAS to .PCache Editor";
             window.Show();
         }
 
